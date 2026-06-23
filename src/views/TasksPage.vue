@@ -27,10 +27,11 @@
       </div>
 
       <ion-list v-else>
-        <ion-item v-for="task in tasks" :key="task.id" lines="full">
+        <ion-item v-for="task in tasks" :key="task.id" lines="full" @click="viewTask(task.id)" button>
           <ion-checkbox
             slot="start"
             :checked="task.done"
+            @click.stop
             @ionChange="handleToggle(task, $event)"
           ></ion-checkbox>
           <ion-label :class="{ done: task.done }">
@@ -40,7 +41,7 @@
             slot="end"
             fill="clear"
             color="danger"
-            @click="removeTask(task.id)"
+            @click.stop="removeTask(task.id)"
           >
             <ion-icon slot="icon-only" :icon="trash"></ion-icon>
           </ion-button>
@@ -60,12 +61,19 @@ import {
 import { trash } from 'ionicons/icons';
 import { useTaskStore } from '@/stores/taskStore';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const taskStore = useTaskStore();
 const { tasks, totalCount, doneCount, pendingCount } = storeToRefs(taskStore);
 const { addTask, toggleTask, removeTask } = taskStore;
 
 const newTaskName = ref('');
+
+const viewTask = (id: string | number) => {
+  router.push(`/tabs/tasks/${id}`);
+};
 
 function handleAdd() {
   if (!newTaskName.value.trim()) return;
