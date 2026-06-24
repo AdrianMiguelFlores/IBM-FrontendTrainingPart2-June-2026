@@ -54,7 +54,7 @@ import { defineStore } from 'pinia'
 //  Hint 4: In the component:
 //          const store = useTaskStore()
 //          const { tasks, doneCount } = storeToRefs(store)  // reactive!
-//          const { addTask } = store                          // NOT storeToRefs
+//          const { addTask } = store                        // NOT storeToRefs
 //  Hint 5: storeToRefs is imported from 'pinia', not 'vue'
 //  Hint 6: nextId.value++ increments THEN returns — use it as the id before push
 // =============================================================
@@ -64,7 +64,9 @@ interface Task {
   id: number
   name: string
   done: boolean
+  photo?: string // Added optional property to hold Capacitor photo webPath
 }
+
 export const useTaskStore = defineStore('tasks', () => {
   // TODO 2: Define state using ref()
   const tasks = ref<Task[]>([
@@ -74,10 +76,12 @@ export const useTaskStore = defineStore('tasks', () => {
     { id: 4, name: 'Continue the project', done: true },
   ])
   const nextId = ref<number>(tasks.value.length + 1)
+
   // TODO 3: Define getters using computed()
   const totalCount   = computed(() => tasks.value.length)
   const doneCount    = computed(() => tasks.value.filter(task => task.done).length)
   const pendingCount = computed(() => tasks.value.filter(task => !task.done).length)
+
   // TODO 4: Define addTask(name) action
   // - Guard against empty names
   // - Push a new task: { id: nextId.value++, name, done: false }
@@ -85,6 +89,7 @@ export const useTaskStore = defineStore('tasks', () => {
     if (!name.trim()) return
     tasks.value.push({ id: nextId.value++, name, done: false })
   }
+
   // TODO 5: Define toggleTask(id) action
   function toggleTask(id: number) {
     for (const task of tasks.value) {
@@ -93,10 +98,31 @@ export const useTaskStore = defineStore('tasks', () => {
       }
     }
   }
+
   // TODO 6: Define removeTask(id) action
   function removeTask(id: number) {
     tasks.value = tasks.value.filter(task => task.id !== id)
   }
+
+  // Strictly named function that updates the matching task's imagePath
+  function addPhotoToTask(id: number, path: string) {
+    console.log(id);
+    console.log(path);
+    const task = tasks.value.find(t => t.id === id)
+    if (task) {
+      task.photo = path
+    }
+  }
+
   // TODO 7: Return everything the component needs to access
-  return { tasks, totalCount, doneCount, pendingCount, addTask, toggleTask, removeTask }
+  return { 
+    tasks, 
+    totalCount, 
+    doneCount, 
+    pendingCount, 
+    addTask, 
+    addPhotoToTask,
+    toggleTask, 
+    removeTask 
+  }
 })

@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-header>
+    <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-title>Tasks</ion-title>
       </ion-toolbar>
@@ -10,38 +10,55 @@
       <div class="input-row">
         <ion-input
           v-model="newTaskName"
-          placeholder="New task..."
+          placeholder="Add a new task..."
           @keyup.enter="handleAdd"
+          class="custom-input"
         ></ion-input>
-        <ion-button @click="handleAdd">Add</ion-button>
+        <ion-button @click="handleAdd" class="add-btn">Add</ion-button>
       </div>
 
       <div class="stats-bar">
-        <span><strong>{{ totalCount }}</strong> Total</span>
-        <span><strong>{{ doneCount }}</strong> Done</span>
-        <span><strong>{{ pendingCount }}</strong> Pending</span>
+        <div class="stat-pill">
+          <span class="stat-num">{{ totalCount }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-num success">{{ doneCount }}</span>
+          <span class="stat-label">Done</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-num warning">{{ pendingCount }}</span>
+          <span class="stat-label">Pending</span>
+        </div>
       </div>
 
       <div v-if="totalCount === 0" class="empty-state">
         <p>No tasks yet — add one above</p>
       </div>
 
-      <ion-list v-else>
-        <ion-item v-for="task in tasks" :key="task.id" lines="full" @click="viewTask(task.id)" button>
+      <ion-list v-else class="task-list">
+        <ion-item v-for="task in tasks" :key="task.id" lines="none" @click="viewTask(task.id)" button class="task-item">
           <ion-checkbox
             slot="start"
             :checked="task.done"
             @click.stop
             @ionChange="handleToggle(task, $event)"
           ></ion-checkbox>
-          <ion-label :class="{ done: task.done }">
+          
+          <ion-avatar v-if="task.photo" slot="start" class="task-avatar">
+            <ion-img :src="task.photo" alt="Task photo"></ion-img>
+          </ion-avatar>
+
+          <ion-label :class="{ done: task.done }" class="task-label">
             {{ task.name }}
           </ion-label>
+          
           <ion-button
             slot="end"
             fill="clear"
             color="danger"
             @click.stop="removeTask(task.id)"
+            class="delete-btn"
           >
             <ion-icon slot="icon-only" :icon="trash"></ion-icon>
           </ion-button>
@@ -56,7 +73,7 @@ import { ref } from 'vue';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonLabel, IonCheckbox,
-  IonInput, IonButton, IonIcon
+  IonInput, IonButton, IonIcon, IonAvatar, IonImg
 } from '@ionic/vue';
 import { trash } from 'ionicons/icons';
 import { useTaskStore } from '@/stores/taskStore';
@@ -91,44 +108,119 @@ function handleToggle(task: any, event: CustomEvent) {
 <style scoped>
 .input-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 20px;
   align-items: center;
 }
-ion-input {
+
+.custom-input {
   flex: 1;
-  --background: var(--ion-color-light);
-  --padding-start: 12px;
-  border-radius: 8px;
-  min-height: 44px;
+  --background: transparent;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  border: 1px solid var(--ion-color-light-shade, #e0e0e0);
+  border-radius: 12px;
+  min-height: 48px;
+  font-size: 15px;
 }
-ion-button {
+
+.add-btn {
   margin: 0;
-  height: 44px;
+  height: 48px;
+  --border-radius: 12px;
+  --box-shadow: none;
+  font-weight: 600;
   flex-shrink: 0;
 }
+
 .stats-bar {
   display: flex;
-  justify-content: space-around;
-  padding: 12px;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat-pill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
   background: var(--ion-color-light);
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 16px;
-  color: var(--ion-color-medium);
+  border-radius: 12px;
 }
-.stats-bar strong {
+
+.stat-num {
+  font-size: 18px;
+  font-weight: 700;
   color: var(--ion-color-dark);
-  font-size: 16px;
-  margin-right: 2px;
 }
+
+.stat-num.success {
+  color: var(--ion-color-success);
+}
+
+.stat-num.warning {
+  color: var(--ion-color-warning);
+}
+
+.stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ion-color-medium);
+  margin-top: 2px;
+}
+
+.task-list {
+  background: transparent;
+  padding: 0;
+}
+
+.task-item {
+  --background: var(--ion-color-step-50, #fafafa);
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.task-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ion-color-dark);
+  margin-left: 4px;
+}
+
+.task-avatar {
+  --border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  margin-inline-end: 12px;
+}
+
+.delete-btn {
+  margin: 0;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  opacity: 0.7;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+}
+
 .empty-state {
   text-align: center;
   color: var(--ion-color-medium);
-  margin-top: 40px;
+  margin-top: 60px;
+  font-size: 15px;
 }
+
 .done {
   text-decoration: line-through;
   color: var(--ion-color-medium);
+  opacity: 0.7;
 }
 </style>
