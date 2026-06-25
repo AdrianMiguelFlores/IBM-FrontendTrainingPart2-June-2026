@@ -95,8 +95,12 @@ async function takeAndSavePhoto() {
       targetHeight: 720,
     });
 
-    if (result.webPath) {
-      taskStore.addPhotoToTask(Number(task.value.id), result.webPath);
+    if (result.thumbnail) {
+      const base64DataUrl = result.thumbnail.startsWith('data:image')
+        ? result.thumbnail
+        : `data:image/jpeg;base64,${result.thumbnail}`;
+
+      taskStore.addPhotoToTask(Number(task.value.id), base64DataUrl);
     }
   } catch (error) {
     console.error('Camera cancelled or failed', error);
